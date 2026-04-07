@@ -18,15 +18,13 @@ class DetectionAgent:
             }
             split_results.append(split_result)
         return split_results
-    
-    def _get_subtext(self, text, start, end):
-        return text[start:end]
+
 
     def detect(self, text, language='en', score_threshold=0.5):
         results = self.analyzer.analyze(text=text, language=language, score_threshold=score_threshold)
         formatted_results = self._split_output(results)
         for result in formatted_results:
-            subtext = self._get_subtext(text, result['start'], result['end'])
+            subtext = text[result['start']:result['end']]
             result['subtext'] = subtext
         return formatted_results
     

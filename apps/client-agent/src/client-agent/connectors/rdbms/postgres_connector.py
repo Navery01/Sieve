@@ -1,4 +1,4 @@
-from ..base import BaseConnector
+from ..base_connector import BaseConnector
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy import text
 
