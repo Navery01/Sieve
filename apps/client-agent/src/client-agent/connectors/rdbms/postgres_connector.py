@@ -1,3 +1,29 @@
+# TODO (Production Hardening):
+#
+# Security:
+#   - Use sqlalchemy.engine.URL.create() instead of a raw f-string DSN to prevent
+#     password exposure in SQLAlchemy debug logs (connect(), line ~59).
+#   - Add SSL/TLS support via connect_args={"ssl": ...} in create_async_engine().
+#
+# Reliability:
+#   - Verify the connection in connect() with a SELECT 1 probe; create_async_engine()
+#     is lazy and won't fail on bad credentials/host until first use.
+#   - Tune connection pool settings (pool_size, max_overflow, pool_recycle, pool_timeout).
+#   - Add query timeouts via connect_args={"command_timeout": N} or SET statement_timeout
+#     to prevent runaway SELECT * queries from hanging indefinitely.
+#
+# Performance:
+#   - Cap the enrichment loop in fetch_sample_data() — a table with many all-NULL columns
+#     fires one query per column with no upper bound.
+#   - Replace the `candidate_row in rows` linear scan with a set of row fingerprints
+#     (e.g. frozenset of items) to avoid quadratic dict comparisons on large rows.
+#
+# Usability:
+#   - Implement __aenter__ / __aexit__ so callers can use `async with` and avoid
+#     leaking connections when disconnect() is forgotten.
+#   - Filter pg_temp_* schemas in fetch_schemas() to exclude temporary schemas from
+#     other sessions.
+
 from .base_connector import RDBMSBaseConnector
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
