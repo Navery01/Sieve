@@ -1,3 +1,8 @@
+# TODO: Swap off of MagicMock and AsyncMock to real postgres connections 
+# for more realistic testing. This will require setting up a test database 
+# and cleaning it up after tests run, but will give us much more confidence 
+# in the correctness of our connector code.
+
 import asyncio
 import importlib
 import sys
