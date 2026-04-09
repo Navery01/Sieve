@@ -1,24 +1,23 @@
-# connectors/base.py
 from abc import ABC, abstractmethod
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+
 
 class BaseConnector(ABC):
-    @abstractmethod
-    async def connect(self, host: str, user: str, password: str, dbname: str) -> AsyncEngine: ...
+    """
+    Root base class for all data-source connectors.
+
+    Connectors are responsible solely for data access: establishing connections,
+    enumerating structure (catalogs, schemas, tables, columns), and fetching
+    raw data rows.  PII detection and analysis is handled at the agent layer.
+    """
 
     @abstractmethod
-    async def fetch_catalog(self) -> list[str]: ...
-
-    @abstractmethod
-    async def fetch_tables(self, database: str) -> list[str]: ...
-
-    @abstractmethod
-    async def scan_table(self, table: str, schema: str | None = None) -> list[dict[str, object]]: ...
-
-    @abstractmethod
-    async def disconnect(self) -> None: ...
+    async def disconnect(self) -> None:
+        """Tear down the connection and release resources."""
+        ...
 
     def has_engine(self) -> None:
-        """Helper method to check if the engine is initialized."""
-        if not hasattr(self, 'engine'):
-            raise Exception("Not connected to the database. Please call connect() first.")
+        """Raise if the underlying engine/connection has not been initialised."""
+        if not getattr(self, "engine", None):
+            raise RuntimeError(
+                "Not connected to the data source. Call connect() first."
+            )
