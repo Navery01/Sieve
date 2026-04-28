@@ -62,6 +62,10 @@ class RDBMSBaseConnector(BaseConnector):
         """Return a safely quoted identifier for this SQL dialect."""
         ...
 
+    @abstractmethod
+    def set_current_database(self, database: str) -> None:
+        """Set the current database context for subsequent operations."""
+        ...
     # ------------------------------------------------------------------
     # Data access — used by agents after crawlers identify targets
     # ------------------------------------------------------------------

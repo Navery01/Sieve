@@ -64,6 +64,13 @@ class PostgresConnector(RDBMSBaseConnector):
     def quote_identifier(self, identifier: str) -> str:
         """Return a safely quoted PostgreSQL identifier."""
         return '"' + identifier.replace('"', '""') + '"'
+    
+    def set_current_database(self, database: str) -> None:
+        """Set the current database context for subsequent operations."""
+        self.has_engine()
+        # Dispose the existing engine and create a new one with the new database.
+        url = self.engine.url.set(database=database)
+        self.engine = create_async_engine(url)
 
     async def connect(
         self,
