@@ -19,12 +19,12 @@ class StructuredScope(BaseScope):
     - linked_servers: None (do not include linked servers)
     """
 
-    include_patterns: list[str] | None
-    exclude_patterns: list[str] | None
-    max_depth: int | None 
-    max_rows: int | None 
-    timeout: int | None
-    linked_servers: list[str] | None
+    include_patterns: list[str] | None = None
+    exclude_patterns: list[str] | None = None
+    max_depth: int | None = None
+    max_rows: int | None = None
+    timeout: int | None= None
+    linked_servers: list[str] | None = None
 
 
     def _validate(self) -> bool:

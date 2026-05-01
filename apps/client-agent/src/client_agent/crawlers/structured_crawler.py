@@ -18,17 +18,23 @@ class StructuredCrawler(BaseCrawler):
     def __init__(self):
         self.connector: RDBMSBaseConnector | None = None
         self.scope: StructuredScope | None = None
+        self.structure_info = {}  # To store metadata about the data source structure (e.g., tables, columns)
 
     async def crawl(self) -> None:
         """Execute the full crawling process for structured data sources."""
+        if not self.connector or not self.scope or not self:
+            raise ValueError("Crawler is not properly initialized with connector and scope.")
+        
+        await self._enumerate_structure()
+
+
+        
 
     async def initialize(self, connector: RDBMSBaseConnector, scope: StructuredScope) -> None:
         """Initialize connection to the structured data source."""
         self.connector = connector
         self.scope = scope
-        await self.connector.connect()
-
-
+     
     async def _enumerate_structure(self) -> None:
         """Enumerate the structure of the data source (e.g., tables, columns)."""
 
@@ -43,8 +49,9 @@ class StructuredCrawler(BaseCrawler):
                 tables = await self.connector.fetch_tables(schema)
                 for table in tables:
                     columns = await self.connector.fetch_columns(table, schema)
-                    # Store the structure information in the scope for later use
-                    self.scope.add_table_structure(database, table, columns)
+                    # Store the structure information for crawl actions and PII analysis
+                    self.structure_info[(database, schema, table)] = columns
+
 
     async def disconnect(self) -> None:
         """Tear down any connections and release resources."""

@@ -21,6 +21,7 @@ class RDBMSBaseConnector(BaseConnector):
         password: str,
         dbname: str,
         port: int = 5432,
+        ssl_verify: bool = True,
     ) -> None:
         """Connect to the given database instance."""
         ...

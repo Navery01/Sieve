@@ -27,6 +27,7 @@
 from .base_connector import RDBMSBaseConnector
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
+from sqlalchemy.engine import URL
 
 
 class PostgresConnector(RDBMSBaseConnector):
@@ -79,18 +80,28 @@ class PostgresConnector(RDBMSBaseConnector):
         password: str,
         dbname: str = "postgres",
         port: int = 5432,
+        ssl_verify: bool = True,
     ) -> None:
         """Create an async engine connected to the given PostgreSQL instance.
 
         Args:
-            host:     Hostname or IP of the PostgreSQL server.
-            user:     Database user name.
-            password: Password for the database user.
-            dbname:   Target database name. Defaults to ``"postgres"``.
-            port:     Server port. Defaults to ``5432``.
+            host:       Hostname or IP of the PostgreSQL server.
+            user:       Database user name.
+            password:   Password for the database user.
+            dbname:     Target database name. Defaults to ``"postgres"``.
+            port:       Server port. Defaults to ``5432``.
+            ssl_verify: Enable SSL verification. Defaults to ``True``.
         """
-        connection_string = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{dbname}"
-        self.engine = create_async_engine(connection_string)
+        url = URL.create(
+            drivername="postgresql+asyncpg",
+            username=user,
+            password=password,
+            host=host,
+            port=port,
+            database=dbname,
+        )
+        connect_args = {} if ssl_verify else {"ssl": False}
+        self.engine = create_async_engine(url, connect_args=connect_args)
 
     async def fetch_catalog(self) -> list[str]:
         """Return the names of all user databases on this server.
@@ -134,6 +145,7 @@ class PostgresConnector(RDBMSBaseConnector):
         )
         async with self.engine.connect() as conn:
             result = await conn.execute(query, {"schema": schema})
+
             return [row[0] for row in result.fetchall()]
 
     async def fetch_columns(self, table: str, schema: str) -> list[dict[str, str]]:
@@ -146,6 +158,9 @@ class PostgresConnector(RDBMSBaseConnector):
         Args:
             table:  Unqualified table name.
             schema: Schema that owns the table.
+
+        Returns:
+            List of dicts with column metadata.
         """
         self.has_engine()
         query = text(

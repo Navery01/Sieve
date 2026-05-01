@@ -11,10 +11,10 @@ class BaseScope(ABC):
     It serves as a blueprint for specifying the boundaries of the crawling process and can be extended to include
     specific parameters relevant to different types of crawlers (e.g., structured, unstructured, semi-structured).
     """
-    include_patterns: list[str] | None
-    exclude_patterns: list[str] | None
-    max_depth: int | None
-    timeout: int | None
+    include_patterns: list[str] | None = None
+    exclude_patterns: list[str] | None = None
+    max_depth: int | None = None
+    timeout: int | None = None
 
 
     @abstractmethod

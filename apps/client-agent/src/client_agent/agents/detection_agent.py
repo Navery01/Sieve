@@ -1,6 +1,4 @@
 from presidio_analyzer import AnalyzerEngine
-from presidio_anonymizer import AnonymizerEngine
-from pprint import pprint
 import re
 
 class DetectionAgent:
@@ -20,7 +18,14 @@ class DetectionAgent:
         return split_results
 
 
-    def detect(self, text, language='en', score_threshold=0.5):
+    def detect(self, text: str, language: str ='en', score_threshold: float = 0.5) -> list[dict]:
+        """Detect PII entities in the given text using Presidio Analyzer.
+        Args:
+            text:  The input text to analyze for PII.
+            language:  The language of the input text.
+            score_threshold:  The minimum score for a detection to be considered valid.
+        
+        """
         results = self.analyzer.analyze(text=text, language=language, score_threshold=score_threshold)
         formatted_results = self._split_output(results)
         for result in formatted_results:
@@ -28,13 +33,16 @@ class DetectionAgent:
             result['subtext'] = subtext
         return formatted_results
     
-    def huristic_detect(self, text):
-        word_bank = [] #TODO: populate with common PII columns/document names
+    def huristic_detect(self, text) -> bool:
+        word_bank = self._load_word_bank("word_bank.txt")
         normalized_text = text.lower()
         for word in word_bank:
-            if re.search(r'\b' + re.escape(word) + r'\b', normalized_text):
-                print(f"Found potential PII: {word}")
+            return re.search(r'\b' + re.escape(word) + r'\b', normalized_text)
 
+    @staticmethod
+    def _load_word_bank(path: str) -> list[str]:
+        with open(path, "r") as f:
+            return [line.strip() for line in f if line.strip() and not line.startswith("#")]
 
 
 if __name__ == "__main__":
